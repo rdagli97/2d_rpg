@@ -35,7 +35,7 @@ public class CharacterStats : MonoBehaviour
 
     private float igniteDamageCooldown = .3f;
     private float igniteDamageTimer;
-    private float igniteDamage;
+    private int igniteDamage;
 
 
     [SerializeField] private int currentHealt;
@@ -65,7 +65,13 @@ public class CharacterStats : MonoBehaviour
 
         if (igniteDamageTimer < 0 && isIgnited)
         {
-            Debug.Log("Take burn damage");
+            Debug.Log("Take burn damage " + igniteDamage);
+
+            currentHealt -= igniteDamage;
+
+            if (currentHealt < 0)
+                Die();
+
             igniteDamageTimer = igniteDamageCooldown;
         }
     }
