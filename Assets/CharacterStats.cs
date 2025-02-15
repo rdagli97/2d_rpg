@@ -38,12 +38,14 @@ public class CharacterStats : MonoBehaviour
     private int igniteDamage;
 
 
-    [SerializeField] private int currentHealt;
+    public int currentHealt;
+
+    public System.Action onHealthChanged;
 
     protected virtual void Start()
     {
         critPower.SetDefaultValue(150);
-        currentHealt = maxHealt.GetValue();
+        currentHealt = GetMaxHealthValue();
     }
 
     protected virtual void Update()
@@ -67,7 +69,7 @@ public class CharacterStats : MonoBehaviour
         {
             Debug.Log("Take burn damage " + igniteDamage);
 
-            currentHealt -= igniteDamage;
+            DecreaseHealthBy(igniteDamage);
 
             if (currentHealt < 0)
                 Die();
@@ -118,7 +120,6 @@ public class CharacterStats : MonoBehaviour
             {
                 canApplyIgnite = true;
                 _targetStats.ApplyAilments(canApplyIgnite, canApplyChill, canApplyShock);
-                Debug.Log("Apllied ignite");
                 return;
             }
 
@@ -126,7 +127,6 @@ public class CharacterStats : MonoBehaviour
             {
                 canApplyChill = true;
                 _targetStats.ApplyAilments(canApplyIgnite, canApplyChill, canApplyShock);
-                Debug.Log("Apllied chill");
                 return;
             }
 
@@ -134,7 +134,6 @@ public class CharacterStats : MonoBehaviour
             {
                 canApplyShock = true;
                 _targetStats.ApplyAilments(canApplyIgnite, canApplyChill, canApplyShock);
-                Debug.Log("Apllied shock");
                 return;
             }
         }
@@ -182,12 +181,18 @@ public class CharacterStats : MonoBehaviour
 
     public virtual void TakeDamage(int _damage)
     {
-        currentHealt -= _damage;
-
-        Debug.Log(_damage);
+        DecreaseHealthBy(_damage);
 
         if (currentHealt <= 0)
             Die();
+    }
+
+    protected virtual void DecreaseHealthBy(int _damage)
+    {
+        currentHealt -= _damage;
+
+        if (onHealthChanged != null)
+            onHealthChanged();
     }
 
     protected virtual void Die()
@@ -239,5 +244,10 @@ public class CharacterStats : MonoBehaviour
         float critDamage = _damage * totalCritPower;
 
         return Mathf.RoundToInt(critDamage);
+    }
+
+    public int GetMaxHealthValue()
+    {
+        return maxHealt.GetValue() + vitality.GetValue() * 5;
     }
 }
